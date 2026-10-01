@@ -1,7 +1,3 @@
-#cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
-
-#set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-
 Include(FetchContent)
 
 FetchContent_Declare(

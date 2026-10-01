@@ -9,7 +9,10 @@ add_library(ili9341_rp2040 STATIC
 target_link_libraries(ili9341_rp2040 PUBLIC
     pico_stdlib 
     hardware_spi
+	hardware_dma
 	#hardware_pio
+
+	tactigachi_cfg
 )
 
 target_include_directories(ili9341_rp2040 PUBLIC

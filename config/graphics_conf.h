@@ -8,9 +8,8 @@
 #define MAX_LAYERS 2
 #define MAX_SPRITES_PER_LAYER 5
 
-// plz 1 only at a time
-#define DIRTY_RENDER 0
-#define FULLSCREEN_RENDER 0
+//#define DIRTY_RENDER 0
+//#define FULLSCREEN_RENDER 0
 #define HSCANLINE_RENDER  1
 
 

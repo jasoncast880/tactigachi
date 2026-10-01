@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.12)
 
-option(HOST_BUILD ON)
+option(HOST_BUILD OFF) # default to firmware ; in order to unit test 
+				       # use flag: `cmake --build build-host -DHOST_BUILD=ON
+						
 if(NOT HOST_BUILD)
 	set (PICO_BOARD pico_w)
 	include($ENV{PICO_SDK_PATH}/external/pico_sdk_import.cmake)

@@ -6,11 +6,11 @@ add_subdirectory(drivers) #for pulling in the core libs; fatfs, engines, etc.
 if(TARGET tactigachi_bm)
 set(CMAKE_BUILD_TYPE Debug)
 target_sources( tactigachi_bm PRIVATE
-	dummy.c
+	dummy.cpp
 	#add on peripherals as you go
-	${CMAKE_CURRENT_SOURCE_DIR}/modules/display/display.c
+	${CMAKE_CURRENT_SOURCE_DIR}/modules/display/display.cpp
 	#${CMAKE_CURRENT_SOURCE_DIR}/modules/sdc/sdc.cpp
-  #${CMAKE_CURRENT_SOURCE_DIR}/modules/buttons/buttons.c
+    #${CMAKE_CURRENT_SOURCE_DIR}/modules/buttons/buttons.c
 	#${CMAKE_CURRENT_SOURCE_DIR}/modules/usb/usb.cpp
 
 )
@@ -74,7 +74,7 @@ target_sources( tactigachi_rtos PRIVATE
 	main.cpp
 	#mem_override.cpp 
 
-	${CMAKE_CURRENT_SOURCE_DIR}/modules/display/display.c
+	${CMAKE_CURRENT_SOURCE_DIR}/modules/display/display.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/modules/sdc/sdc.cpp
 
 	${CMAKE_CURRENT_SOURCE_DIR}/modules/usb/usb.cpp

@@ -2,7 +2,10 @@
 
 #include "pico/stdlib.h"
 #include "hardware/spi.h"
+#include "hardware/dma.h"
 #include "hardware/gpio.h"
+
+#include "graphics_conf.h"
 
 #ifdef __cplusplus
 extern "C"{
@@ -59,7 +62,15 @@ static volatile bool NORMAL_MODE = true;
 static void ili9341_hard_reset();
 static void ili9341_soft_reset(); 
 
-void ili9341_initialize(int8_t cs,int8_t rst,int8_t dc); //running on spi0 bus
+static spi_inst_t* bus;
+void ili9341_initialize(spi_inst_t* bus, int8_t cs,int8_t rst,int8_t dc); //running on spi0 bus w . dma enabled
+
+static uint dma_chan;
+static uint16_t* read_addr;
+static uint8_t screen_sector;
+static uint8_t MAX_SCREEN_SECTORS;
+static void ili9341_dma_init(uint16_t* read_addr);
+void hscanline_handler();
 
 //wrapped in CS toggling.
 void ili9341_writeCommand(uint8_t commandByte);
@@ -75,6 +86,9 @@ void ili9341_setScrollPtr(uint16_t vsp); //page 123 of strionix manual
 //for locking access to the spi0 bus
 void ili9341_setCS_HI();
 void ili9341_setCS_LO();
+
+void ili9341_dma_mem_to_disp( volatile void* write_addr, uint16_t read_addr, uint32_t tc ) ;
+void ili9341_dma_periph_to_disp( volatile void* write_addr, uint16_t read_addr, uint32_t tc ) ;  //IDK HOW THIS ONE WILL WORK
 
 #ifdef __cplusplus
 }

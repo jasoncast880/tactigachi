@@ -4,6 +4,8 @@
 #include <hardware/spi.h>
 #include <pico/time.h>
 
+#include "pinout.h"  //TODO ensure that this is included via CMAKE
+
 static uint8_t _ILI9341_CS;
 static uint8_t _ILI9341_RST;
 static uint8_t _ILI9341_DC;
@@ -11,8 +13,85 @@ static uint8_t _ILI9341_MOSI;
 static uint8_t _ILI9341_SCLK;
 static uint8_t _ILI9341_MISO;
 
+//assume that the channel is claiming from an allocated memory region/hscanline buf
+static void ili9341_dma_init(uint16_t* read_addr) { 
+	read_addr = read_addr;
+	screen_sector = 0 ;
+
+	dma_chan = dma_claim_unused_channel(true);
+	dma_channel_config c = dma_channel_get_default_config(dma_chan);
+	static uint32_t tc = HSCANLINE_SIZE * 320;
+
+	channel_config_set_transfer_data_size(&c, DMA_SIZE_16);
+	channel_config_set_write_increment(&c, false);
+	channel_config_set_read_increment(&c, true);
+	channel_config_set_dreq(&c, DREQ_SPI0_RX); //TODO hardcoded ; fix for portability
+	
+	/*
+	 * technical challenges: 
+	 * 1 ) need to sync the write increment ring wrap to the start of the hscanline
+	 *
+	 * 2 ) need to sync the end of the display packet with the end of the channel
+	 * transmission..
+	 *
+	 * systemic challenges:
+	 * 1 ) need to coordinate DMA channels across modules
+	 * 2 ) need to cordinate DMA ISR, other ISR across driver files.
+	 */
+
+	dma_channel_configure(
+		dma_chan,
+		&c, 
+		&spi0_hw->dr,
+		read_addr, //TODO does this increment over transfer sequence ????
+		tc, 
+		false
+	);
+
+	dma_channel_set_irq0_enabled(dma_chan, true);
+
+	irq_set_exclusive_handler(DMA_IRQ_0, hscanline_handler);
+	irq_set_enabled(DMA_IRQ_0, true);
+	
+	//call dma_handler() once to kickstart the transfer. note that it needs to run on command 
+}
+
+void hscanline_handler() { //this needs to trigger at the end of dma chan's transfer
+	dma_hw->ints0 = 1u << dma_chan;
+	dma_channel_set_read_addr(dma_chan, read_addr, false); 
+	//simply reconfigures the chan to map with the scanline region's start.
+	//seperate protocol is needed to move the draw area to the right point.
+	screen_sector++;
+	if(screen_sector > MAX_SCREEN_SECTORS)
+		screen_sector = 0 ;
+}
+
+
+// reconfigure the screen peripheral to the proper screen phase so DMA can do its mass-data transfer. At the end of the sequence start the DMA chan
+int ili9341_reconfigure_draw_area(uint8_t hscanline_no ) {
+	//hardware : set peripheral to appropriate sector
+	ili9341_setAddrWindow( 0, hscanline_no * HSCANLINE_SIZE, 320, HSCANLINE_SIZE );
+
+	//software side : update the engine's global pointer to calculate the right screen sector.
+	dma_channel_start(dma_chan);
+}
+
+void write_screen() { 
+	/*
+	 * conditions to call: should have the engine up and running. 
+	 * engine will have given a pointer handle for easy read pulls.
+	 * 
+	 */
+	
+}
+
 //note after init, you still have to put cs low in order to write spi.
-void ili9341_initialize(int8_t cs, int8_t rst, int8_t dc) { 
+void ili9341_initialize(spi_inst_t* bus, int8_t cs, int8_t rst, int8_t dc) { 
+
+	spi_init(bus, 8000 * 1000); //SPI hardcoded @ 8MHz
+	gpio_set_function(SPI0_SCLK, GPIO_FUNC_SPI);
+	gpio_set_function(SPI0_RX, GPIO_FUNC_SPI);
+	gpio_set_function(SPI0_TX, GPIO_FUNC_SPI);
 
     _ILI9341_CS = cs;
     _ILI9341_RST = rst;
@@ -75,7 +154,7 @@ void ili9341_writeCommand(uint8_t commandByte){
     gpio_put(_ILI9341_CS, 0);
 
     gpio_put(_ILI9341_DC, 0);
-    spi_write_blocking(spi0, &commandByte, 1);
+    spi_write_blocking(bus, &commandByte, 1);
 
     gpio_put(_ILI9341_CS, 1);
 }
@@ -84,7 +163,7 @@ void ili9341_writeData(uint8_t dataByte){
     gpio_put(_ILI9341_CS, 0);
 
     gpio_put(_ILI9341_DC, 1);
-    spi_write_blocking(spi0, &dataByte, 1);
+    spi_write_blocking(bus, &dataByte, 1);
 
     gpio_put(_ILI9341_CS, 1);
 }
@@ -93,7 +172,7 @@ void ili9341_writeDataBuffer8(uint8_t* dataBuf, size_t len){
     gpio_put(_ILI9341_CS, 0);
 
     gpio_put(_ILI9341_DC, 1);
-    spi_write_blocking(spi0, dataBuf, len);
+    spi_write_blocking(bus, dataBuf, len);
 
     gpio_put(_ILI9341_CS, 1);
 }

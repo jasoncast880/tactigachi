@@ -16,7 +16,7 @@
 #include "tilemaps.h"
 
 #include "engine_api.h"
-#include "display.h"
+#include "display.hpp"
 
 //DUMMY.CPP PURPOSE: Test display drivers without RTOS bloat/interference.
 
@@ -29,7 +29,7 @@ int main() {
 			DEFAULT_SCREEN_TILES_X, DEFAULT_SCREEN_TILES_Y );
 
 	engine_init(system_layer); //api/tile_engine initializes the engine glob
-	display_setup(e); //hardwares needs the engine as confirmation its ready to run
+	Display::setup(e); //hardwares needs the engine as confirmation its ready to run
 
 	Entity_Handle* sprite = add_sprite(&jet_sprite_16[0], 4, &demo_spritemap_1[0], 2, 2, system_layer);
 	update_sprite_position( sprite, 0 , 0 );

@@ -1,4 +1,6 @@
 /build/
+/build-host/ #build artifacts
+
 /.cache/
 compile_commands.json
 
