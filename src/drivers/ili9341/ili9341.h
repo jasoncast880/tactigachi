@@ -70,7 +70,7 @@ static uint16_t* read_addr;
 static uint8_t screen_sector;
 static uint8_t MAX_SCREEN_SECTORS;
 static void ili9341_dma_init(uint16_t* read_addr);
-void hscanline_handler();
+static void hscanline_handler();
 
 //wrapped in CS toggling.
 void ili9341_writeCommand(uint8_t commandByte);
@@ -88,7 +88,7 @@ void ili9341_setCS_HI();
 void ili9341_setCS_LO();
 
 void ili9341_dma_mem_to_disp( volatile void* write_addr, uint16_t read_addr, uint32_t tc ) ;
-void ili9341_dma_periph_to_disp( volatile void* write_addr, uint16_t read_addr, uint32_t tc ) ;  //IDK HOW THIS ONE WILL WORK
+void ili9341_dma_periph_to_disp( volatile void* write_addr, uint16_t read_addr, uint32_t tc ) ;  // primary usage example: spi sdc to display via dma. send pre-formatted data after a configure subroutine
 
 #ifdef __cplusplus
 }

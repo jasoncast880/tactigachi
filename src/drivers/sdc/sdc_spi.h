@@ -41,9 +41,6 @@
 static uint64_t sdc_cmd;
 int sdc_initialize(uint8_t cs, spi_inst_t* spi);
 
-static uint8_t generate_CRC_7(uint64_t val);
-static uint16_t generate_CRC_16(uint64_t val); //optional, unnecessary
-
 int send_cmd(uint8_t idx, uint32_t arg);
 
 static uint8_t recv_r1(); //wait for r1 response ; only needed for follow up on cmd's 

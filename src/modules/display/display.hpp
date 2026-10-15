@@ -39,9 +39,12 @@ enum cmd_sequence_t {
 
 void setup(Engine* eng);
 
-void tile_handler(); //for tile-by-tile PARTIAL rendering ISR
-void frame_handler(); //for full framebuffer rendering    ISR
-void hscanline_handler(); //for full framebuffer rendering    ISR
+
+static void frame_handler(); //provide fps data and a tick timer for reliable pacing
+							 
+void push_pixels(); //main thread work
+
+void halt_panic_mode();
 
 #ifdef RTOS_MODE
 

@@ -73,7 +73,7 @@ int ili9341_reconfigure_draw_area(uint8_t hscanline_no ) {
 	ili9341_setAddrWindow( 0, hscanline_no * HSCANLINE_SIZE, 320, HSCANLINE_SIZE );
 
 	//software side : update the engine's global pointer to calculate the right screen sector.
-	dma_channel_start(dma_chan);
+	//dma_channel_start(dma_chan);
 }
 
 void write_screen() { 
@@ -82,6 +82,11 @@ void write_screen() {
 	 * engine will have given a pointer handle for easy read pulls.
 	 * 
 	 */
+
+	for( int i = 0 ; i < (240/HSCANLINE_SIZE) ; i++ ) {
+		ili9341_reconfigure_draw_area(i) ; 
+		ili9341_dma_mem_to_disp( NULL, read_addr, (HSCANLINE_SIZE * 320) );
+	}
 	
 }
 
@@ -242,4 +247,12 @@ void ili9341_setCS_HI() {
 void ili9341_setCS_LO() {
 	gpio_put(_ILI9341_CS, 0);
 }
+
+ili9341_dma_mem_to_disp( volatile void* write_addr, uint16_t read_addr, uint32_t tc ) {
+	dma_channel_set_transfer_count( dma_chan, tc, false );
+	dma_channel_set_write_addr( dma_chan, write_addr, true ) ;
+	
+}
+
+
 

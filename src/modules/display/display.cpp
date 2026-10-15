@@ -10,11 +10,10 @@
 #include "ampalaya_tileset_16.h"
 #include "tilemaps.h"
 
-namespace Display{
 
 static uint32_t spi0_dma_chan; //hardware
 
-void setup(Engine* eng) {
+void Display::setup(Engine* eng) {
 	//how to verfy e works?? TODO
 	if(!eng) {
 		//break and shii
@@ -75,4 +74,3 @@ void update_entities(void* pvParams ) {
 
 #endif 
 
-}
